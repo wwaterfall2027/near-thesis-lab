@@ -111,7 +111,9 @@ test('dailyRows joins NearBlocks and DefiLlama by date and converts yocto', () =
 });
 
 test('end to end on the frozen snapshot: the figures quoted in THESIS.md', async () => {
-  const t = computeThesis(await loadSources('snapshot', '..'));
+  // Resolve data/ relative to this file, so the test works from any page that imports it.
+  const repoRoot = new URL('..', import.meta.url).href.replace(/\/$/, '');
+  const t = computeThesis(await loadSources('snapshot', repoRoot));
   eq(t.endDate, '2026-11-11');
   eq(t.weeks.length, 99);
   eq(Math.round(t.decoupling.intentsGrowth), 1094);
