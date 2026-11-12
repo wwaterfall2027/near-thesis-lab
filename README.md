@@ -47,6 +47,10 @@ The thesis is about NEAR's own economics. It covers NEAR Intents as the cross-ch
 
 The sources cannot show how concentrated Intents volume is, or how many distinct users produce it (that needs the Intents Explorer API with a JWT, or BigQuery). They also cannot show how much revenue was actually spent on buybacks rather than swept to the revenue wallets. THESIS.md lists these limits explicitly. This is analysis, not investment advice.
 
+## Other project by the same author
+
+As the hackathon rules require for a second submission: [$MELT](https://github.com/wwaterfall2027/melt) (track Memecoins With Mechanics) is an independent project.
+
 ## Credits
 
 Built with AI assistance (Claude Code). Data from NearBlocks and DefiLlama. MIT licensed.
