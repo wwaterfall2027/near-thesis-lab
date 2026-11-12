@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thesis Lab Tests</title>
+<style>
+  :root { --bg: #fff; --ink: #16181d; --ok: #0f8a6c; --bad: #b42318; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0f1114; --ink: #eceef1; --ok: #34d399; --bad: #f87171; } }
+  body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--ink); font: 14px/1.5 ui-monospace, Consolas, monospace; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+</style>
+</head>
+<body>
+<h1>NEAR Thesis Lab: tests</h1>
+<pre id="out">running…</pre>
+<script type="module">
+  import { run } from './analysis.test.js';
+  const res = await run();
+  const pass = res.filter((r) => r.ok).length;
+  document.getElementById('out').innerHTML =
+    res.map((r) => r.ok ? `<span class="ok">PASS</span> ${r.name}` : `<span class="bad">FAIL</span> ${r.name}\n     ${r.error}`).join('\n') +
+    `\n\n${pass}/${res.length} passing`;
+  document.title = `${pass}/${res.length} passing`;
+  window.TEST_RESULTS = res;
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEAR Thesis Lab</title>
+<meta name="description" content="An evidence-first, re-runnable investment thesis for NEAR: Intents volume, active accounts, lead-lag tests and buyback coverage of new supply.">
+<style>
+  :root {
+    --bg: #f7f7f4; --surface: #ffffff; --ink: #16181d; --muted: #5d6470; --line: #e3e4e0; --grid: rgba(0,0,0,.07);
+    --a1: #0f8a6c; --a2: #c2410c; --a3: #6d28d9; --warn: #b45309; --yes: #0f8a6c; --no: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1114; --surface: #171a1f; --ink: #eceef1; --muted: #9aa2ad; --line: #2a2f37; --grid: rgba(255,255,255,.08);
+      --a1: #34d399; --a2: #fb923c; --a3: #a78bfa; --warn: #fbbf24; --yes: #34d399; --no: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1060px; margin: 0 auto; padding: 28px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -.01em; }
+  h2 { font-size: 19px; margin: 36px 0 8px; }
+  .lede { font-size: 17px; max-width: 760px; margin: 0 0 10px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  a { color: var(--a1); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .card .label { color: var(--muted); font-size: 13px; }
+  .card .value { font-size: 24px; font-weight: 650; margin: 4px 0; font-variant-numeric: tabular-nums; }
+  .card .note { color: var(--muted); font-size: 12px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .chart { position: relative; height: 340px; }
+  .says { margin: 12px 0 4px; }
+  details { margin-top: 8px; color: var(--muted); font-size: 13px; }
+  details code, td code { font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  td { border-top: 1px solid var(--line); padding: 8px 6px; vertical-align: top; }
+  td:last-child { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  ul.checks { list-style: none; padding: 0; margin: 0; }
+  ul.checks li { padding: 8px 0; border-top: 1px solid var(--line); }
+  ul.checks span { display: inline-block; width: 44px; font-weight: 700; }
+  ul.checks li.yes span { color: var(--yes); } ul.checks li.no span { color: var(--no); }
+  small { color: var(--muted); }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<main>
+  <h1>NEAR Thesis Lab</h1>
+  <p class="lede"><b>Thesis:</b> NEAR's usage has moved from headcount to throughput. Value settled through NEAR Intents is growing while raw activity counts shrink, and since February 2026 part of that flow is captured for NEAR holders through buybacks. The capture is real but, today, far too small to offset new supply. Every figure below is recomputed in your browser from public data.</p>
+  <p class="meta" id="mode"></p>
+  <p class="meta" id="asof">Loading data…</p>
+
+  <div class="cards" id="cards"></div>
+
+  <h2>1. Value and headcount moved in opposite directions</h2>
+  <div class="panel">
+    <div class="chart"><canvas id="c-decoupling"></canvas></div>
+    <p class="says" id="s-decoupling"></p>
+    <details><summary>How this is computed</summary>
+      Daily rows from NearBlocks <code>/v1/charts</code> joined with DefiLlama NEAR Intents daily volume, aggregated to complete ISO weeks (Monday to Sunday) starting with the first full week of Intents data. Growth compares the mean of the first four weeks with the mean of the last four. Code: <code>src/analysis.js</code> (<code>dailyRows</code>, <code>weekly</code>) and <code>src/thesis.js</code>.
+    </details>
+  </div>
+
+  <h2>2. Is Intents volume a leading indicator?</h2>
+  <div class="panel">
+    <div class="chart"><canvas id="c-leadlag"></canvas></div>
+    <p class="says" id="s-leadlag"></p>
+    <details><summary>How this is computed</summary>
+      Week-over-week log changes (so trends do not create fake correlation). Cross-correlation at lags −8…+8 weeks; a bar at lag +L pairs Intents volume in week t with the other series in week t+L. The dashed lines are the ±1.96/√n band for a single lag. Because eight positive lags are inspected, significance comes from a permutation test of the <i>maximum</i> lead correlation (2,000 shuffles, fixed seed 42, so the p-value is reproducible). Code: <code>crossCorrelation</code>, <code>leadPermutationTest</code>.
+    </details>
+  </div>
+
+  <h2>3. Does the captured revenue offset new supply?</h2>
+  <div class="panel">
+    <div class="chart"><canvas id="c-capture"></canvas></div>
+    <p class="says" id="s-capture"></p>
+    <table id="supply"></table>
+    <details><summary>How this is computed</summary>
+      Net new supply is the change in NearBlocks <code>total_supply</code> (issuance minus burnt fees) over the 365 days to the end date. Captured revenue is DefiLlama's NEAR Intents <code>dailyRevenue</code> (NEAR/wNEAR swept into NEAR's revenue wallets; used for open-market buybacks since 2026-02-23). Coverage = annualised 30-day revenue ÷ (net new NEAR × price). Break-even price = revenue ÷ net new NEAR. Monthly issuance is valued at that month's average price. Code: <code>supplyEconomics</code>, <code>valueCapture</code>.
+    </details>
+  </div>
+
+  <h2>What would change the verdict</h2>
+  <div class="panel">
+    <p class="meta">Evaluated on the data loaded above. See THESIS.md for the full falsification criteria.</p>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+  <h2>Sources</h2>
+  <div class="panel"><table id="sources"></table></div>
+
+  <p class="meta" style="margin-top:28px">Built at NEAR HACKATHON. Not investment advice: this page tests claims, it does not recommend a trade. Code and data: <a href="https://github.com/wwaterfall2027/near-thesis-lab">github.com/wwaterfall2027/near-thesis-lab</a>.</p>
+</main>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
